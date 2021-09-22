@@ -1,0 +1,27 @@
+     Fstdpf     IF A E             disk
+     D MessageText     S          32740A   varying
+     D ResponseMsg     S           9999A   varying
+     D ResponseHeader  S           1000A   varying
+     D URL             S            100A   varying
+     D header          S            100A   varying
+     D ReturnedSQLCod  S              5A
+      /Free
+          exec sql
+             set option commit = *none;
+             Exec sql Call QSYS2.QCMDEXC('CHGJOB CCSID(37)');
+             URL = 'https://gorest.co.in/public/v1/users/103';
+          header =
+               '<httpHeader>'                                        +
+               '<header name = "Content-Type" Value = "Application/json">'+
+               '</header>'                                            +
+               '</httpHeader>';
+          Exec sql
+             select  Coalesce(Varchar(ResponseMsg,9999),' '),
+                     Varchar(ResponseHttpHeader,1000) into : ResponseMsg,
+                                                           : ResponseHeader
+             from Table(Systools.HttpGetClobVerbose(Trim(:URL),
+                                                   Trim(:header)));
+              data = ResponseMsg;
+              write stdrec;
+         *inlr = *on;
+      /End-Free
