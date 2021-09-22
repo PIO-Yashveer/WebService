@@ -1,0 +1,48 @@
+     H DFTACTGRP(*NO) ACTGRP(*NEW) BNDDIR('YASH/WEB')
+     FSTUDENT   IF   E           K DISK
+     DGetenv           pr              *   extproc('getenv')
+     D var                             *   value Options(*string)
+
+     Dwritetoweb       pr                  extproc('QtmhWrStout')
+     D Datavar                    65535A   Options(*varsize)
+     D Datavarlen                    10I 0 const
+     D Errorcode                   8000A   Options(*Varsize)
+      *
+     DErrDs            ds                  qualified
+     D BytesProv                     10I 0 Inz(0)
+     D BytesAvail                    10I 0 Inz(0)
+      *
+     D CRLF            C                   x'0d25'
+     D DATA            S           5000A
+     D URL             S            100A
+     D POS             S              6s 0
+     D ROLLNO          S              4S 0
+
+      ***************Main Program****************
+      /Free
+         // setting up header
+         DATA = 'Content-type: Text/html' + CRLF + CRLF ;
+         writetoweb(DATA: %len(%trim(DATA)): ErrDs);
+
+         URL = %Str(GetEnv('REQUEST_URI'));
+         POS = (%SCANR('/':URL)+1);
+
+
+         MONITOR;
+           ROLLNO  = %DEC(%SUBST(URL:POS:POS):4:0);
+           CHAIN ROLLNO STUDENT;
+           IF %FOUND(STUDENT);
+             DATA = 'ROLL NO:'+(%CHAR(ROLL))+CRLF +
+                    'STUDENT NAME:'+NAME+CRLF +
+                    'DEPARTEMENT:'+DEPT+CRLF;
+           ELSE;
+             DATA = 'Wrong ROLL NO';
+           ENDIF;
+         ON-ERROR;
+           DATA = 'INVALID URL';
+         ENDMON;
+         writetoweb(DATA: %len(%trim(DATA)): ErrDs);
+
+         *Inlr = *On;
+         Return;
+      /End-Free

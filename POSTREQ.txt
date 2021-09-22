@@ -1,0 +1,68 @@
+     H DFTACTGRP(*NO) ACTGRP(*NEW) BNDDIR('YASH/WEB':'QC2LE')
+     FSTUDENT   IF A E           K DISK
+      *
+     DGetenv           pr              *   extproc('getenv')
+     D var                             *   value Options(*string)
+      *
+     Dwritetoweb       pr                  extproc('QtmhWrStout')
+     D Datavar                    65535A   Options(*varsize)
+     D Datavarlen                    10I 0 const
+     D Errorcode                   8000A   Options(*Varsize)
+      *
+     DErrDs            ds                  qualified
+     D BytesProv                     10I 0 Inz(0)
+     D BytesAvail                    10I 0 Inz(0)
+
+        /COPY QSYSINC/QRPGLESRC,QUSEC
+      *
+     DReadStdInput     pr                  extproc('QtmhRdStin')
+     D szRtnBuffer                65535A   Options(*varsize)
+     D nBufLen                       10I 0 const
+     D nRtnLen                       10I 0
+     D QUSEC                               like(QUSEC)
+      *
+     D CRLF            C                   x'0d25'
+     D DATA            S           5000A
+     D URL             S            100A
+     D REQMETHOD       S             20A
+     D ContentType     S            100A
+      *
+     D RtnBuffer       s           4096A   inz
+     D RtnLen          s             10I 0
+     D EBCData         s          32766A
+     D apiError        ds                  likeds(QUSEC) inz
+     D stdroll         s              4s 0
+     D stdname         s             20a
+     D stddept         s             20a
+     D compos          s              4s 0
+     D pos             s              4s 0
+
+      ***************Main Program****************
+      /Free
+         // setting up header
+         DATA = 'Content-type: text/html' + CRLF + CRLF ;
+         writetoweb(DATA: %len(%trim(DATA)): ErrDs);
+
+         URL = %Str(GetEnv('REQUEST_URI'));
+         REQMETHOD = %STR(GetEnv('REQUEST_METHOD'));
+         IF REQMETHOD = 'POST';
+              ContentType = %STR(GetEnv('CONTENT_TYPE'));
+              ReadStdInput(RtnBuffer:%size(RtnBuffer):RtnLen:apiError);
+         ENDIF;
+             DATA = %trim(RtnBuffer);
+             compos = %scan(',':DATA);
+             stdroll = %dec(%subst(DATA:1:compos-1):4:0);
+             pos = compos+1;
+             compos = %scan(',':DATA:pos);
+             stdname = %subst(DATA:pos:compos-pos);
+             pos = compos+1;
+             compos = %scan(',':DATA:pos);
+           //stddept = %subst(DATA:pos:compos-pos);
+             roll = stdroll;
+             name = stdname;
+           //dept = stddept;
+             write stdrec;
+
+         *Inlr = *On;
+         Return;
+      /End-Free
