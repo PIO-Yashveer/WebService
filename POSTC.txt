@@ -1,0 +1,40 @@
+     D ResponseMsg     S           9999A   varying
+     D ResponseHeader  S           1000A   varying
+     D URL             S            200A   varying
+     D header          S           1000A   varying
+     D Auth            S            100A   varying
+     D Body            S            200A   varying
+     D data            S             50A   varying
+      /Free
+          exec sql
+             set option commit = *none;
+             Exec sql Call QSYS2.QCMDEXC('CHGJOB CCSID(37)');
+             URL = 'https://gorest.co.in/public/v1/users';
+             Auth ='4caa3b75614a4b9c77f8b1e31fb227cd0e238960615431'+
+                   'b6327e8458bfac212a';
+
+
+          header =
+               '<httpHeader>'+
+               '<header name="Content-Type" Value="application/json">'+
+               '</header>'+
+              '<header name="Authorization" '+
+              'value="Bearer '+%trim(Auth)+'">'+
+              '</header>'+
+               '</httpHeader>';
+          body = '{'+
+                      '"name":"Yashveer", +
+                       "email":"yashveer97@gmail.com", +
+                       "gender":"male", +
+                       "status":"active",'+
+                 '}';
+          Exec sql
+             select  Coalesce(Varchar(ResponseMsg,9999),''),
+                     Varchar(ResponseHttpHeader,1000) into :ResponseMsg,
+                                                           :ResponseHeader
+             from Table(Systools.HttpPostClobVerbose(Trim(:URL),
+                                                   Trim(:header),
+                                                   Trim(:body)));
+            dsply sqlcode;
+         *inlr = *on;
+      /End-Free
