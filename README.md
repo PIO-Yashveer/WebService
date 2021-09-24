@@ -29,6 +29,7 @@ Send Get request through URL.
 Data will be displayed on browser.
 
 Create a program to handle POST request.
+
 Convert TCP data to EBCDIC character set.
 
 Create a https://github.com/PIO-Yashveer/WebService/blob/main/POSTREQ.txt RPG Program which can handle post request.
@@ -37,6 +38,26 @@ This Program will convert TCP data to EBCDIC character set.
 
 Send Post request through URL.
 
-Give plain text in the body of the URL, which you want to convert.
+Create a program to handle consuming api using GET request.
 
-Program will return converted EBCDIC character data to brower.
+create a https://github.com/PIO-Yashveer/WebService/blob/main/GETC.txt RPG program which can handle get request
+
+This program will POST data to external api
+
+Create a program to handle consuming api using POST request.
+
+create a https://github.com/PIO-Yashveer/WebService/blob/main/POSTC.txt RPG program which can handle post request
+
+This program will POST data to external api
+
+Create a program to handle consuming api using PUTC request.
+
+create a https://github.com/PIO-Yashveer/WebService/blob/main/PUTC.txt RPG program which can handle PUT request
+
+This program will update data into external api
+
+Create a program to handle consuming api using DELETE request.
+
+create a https://github.com/PIO-Yashveer/WebService/blob/main/DLTC.TXT RPG program which can handle DELETE request
+
+This program will Delete data into external api
