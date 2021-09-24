@@ -1,0 +1,31 @@
+     D ResponseMsg     S           9999A   varying
+     D ResponseHeader  S           1000A   varying
+     D URL             S            200A   varying
+     D header          S           1000A   varying
+     D Auth            S            100A   varying
+      /Free
+          exec sql
+             set option commit = *none;
+             Exec sql Call QSYS2.QCMDEXC('CHGJOB CCSID(37)');
+             URL = 'https://gorest.co.in/public/v1/users/115';
+             Auth ='097703b9b512e09efc4fdb1d6161caf3b0371'+
+                   'd1725417e1eeac8caa115493a9a';
+
+
+          header =
+               '<httpHeader>'+
+               '<header name = "Content-Type" Value = "application/json">'+
+               '</header>'+
+              '<header name = "Authorization" '+
+              'value = "Bearer '+%trim(Auth)+'">'+
+             ' </header>'+
+               '</httpHeader>';
+          Exec sql
+             select  Coalesce(Varchar(ResponseMsg,9999),' '),
+                     Varchar(ResponseHttpHeader,1000) into : ResponseMsg,
+                                                           : ResponseHeader
+             from Table(Systools.HttpDELETEClobVerbose(Trim(:URL),
+                                                   Trim(:header)));
+            dsply sqlcode;
+         *inlr = *on;
+      /End-Free
